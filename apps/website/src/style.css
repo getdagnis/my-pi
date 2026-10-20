@@ -1,0 +1,41 @@
+@font-face {
+  font-family: "Chalkduster Local";
+  src: url("./assets/Chalkduster.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  color: #e6e5d8;
+  background: #080b09;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+button {
+  color: inherit;
+}
+::selection {
+  background: #879773;
+  color: #f1f0e7;
+}

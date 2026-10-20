@@ -1,0 +1,542 @@
+$chalk: #eeeede
+// Put "Chalkduster Local" first here to switch to the alternate local font.
+$chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Felt", cursive
+
+.page
+  min-height: 100svh
+  display: flex
+  flex-direction: column
+  background: #090c0a
+  color: $chalk
+
+.topBar
+  position: relative
+  z-index: 2
+  min-height: 82px
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 32px
+  padding: 12px clamp(18px, 5vw, 64px)
+  background-color: #21113b
+  background-image: linear-gradient(90deg, rgba(13, 9, 23, .83), rgba(20, 11, 35, .55)), url("./assets/footer-bg.jpg")
+  background-position: center 37%
+  background-size: cover
+
+.brand
+  flex: 0 0 auto
+
+.brand h1
+  margin: 0
+  color: rgba(255, 255, 244, .95)
+  font-family: $chalk-font
+  font-size: clamp(26px, 3vw, 35px)
+  font-weight: 400
+  line-height: 1.05
+  text-shadow: 0 2px 9px rgba(0, 0, 0, .5)
+
+.board
+  position: relative
+  isolation: isolate
+  flex: 1
+  min-height: 0
+  overflow: hidden
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  padding: clamp(24px, 5vh, 56px) clamp(18px, 5vw, 72px) 28px
+  background-color: #151a16
+  background-image: linear-gradient(0deg, rgba(4, 8, 6, .42), rgba(4, 8, 6, .22)), url("../blackboard-bg.png")
+  background-position: center
+  background-size: cover
+
+.boardWash
+  position: absolute
+  z-index: -1
+  inset: 0
+  background: radial-gradient(ellipse at 50% 48%, rgba(23, 30, 24, .12), rgba(4, 7, 5, .68) 100%)
+  pointer-events: none
+
+.eyebrow
+  display: block
+  margin-bottom: 4px
+  color: rgba(246, 238, 255, .7)
+  font-size: 9px
+  letter-spacing: .18em
+  text-transform: uppercase
+
+.digitArea
+  width: min(100%, 1050px)
+  display: flex
+  flex-direction: column
+  align-items: center
+  text-shadow: 0 0 1px rgba(255, 255, 235, .6), 0 2px 10px rgba(0, 0, 0, .75)
+
+.piPrefix
+  display: flex
+  align-items: baseline
+  gap: .2em
+  margin-bottom: 15px
+  color: rgba(255, 255, 237, .94)
+  font-family: $chalk-font
+  font-size: clamp(32px, 5vw, 49px)
+  line-height: 1
+
+.equals
+  font-size: .78em
+  opacity: .76
+
+.prefixActive
+  color: #b692ff
+  text-shadow: 0 0 12px rgba(174, 132, 255, .78)
+
+.digits
+  width: min(100%, 29em)
+  display: grid
+  grid-template-columns: repeat(20, minmax(0, 1fr))
+  justify-items: center
+  row-gap: clamp(6px, 1vh, 12px)
+  font-family: $chalk-font
+  font-size: clamp(24px, 2.5vw, 32px)
+  font-weight: 400
+  line-height: 1.22
+
+.digit, .liveDigit
+  min-width: 1ch
+  min-height: 1.2em
+  text-align: center
+  transition: color .2s ease, opacity .2s ease, transform .18s ease
+
+.blank
+  color: rgba(244, 244, 222, .42)
+
+.guessed
+  color: rgba(255, 255, 239, .96)
+  animation: chalkIn .3s ease-out both
+
+.hinted
+  color: #793ed2
+  animation: hintReveal 1s ease-in-out both
+  animation-delay: var(--hint-delay)
+
+.liveDigit
+  position: relative
+  color: #8e62ff
+  animation: blinkOff 1s steps(1, end) infinite
+
+.sequenceFlashing .digit
+  animation: sequenceFlash .45s ease-in-out 2
+
+.status
+  min-height: 20px
+  margin: clamp(16px, 3vh, 30px) 0 0
+  color: rgba(236, 237, 218, .64)
+  font-size: 11px
+  letter-spacing: .035em
+  text-align: center
+  transition: color .2s ease
+
+.statusError
+  color: #e4bb9e
+
+.celebration
+  position: absolute
+  top: 22%
+  left: 50%
+  z-index: 2
+  transform: translateX(-50%)
+  padding: 11px 18px
+  border: 1px solid rgba(222, 225, 196, .35)
+  border-radius: 2px
+  background: rgba(17, 22, 18, .82)
+  color: #e9eccf
+  font-size: 12px
+  letter-spacing: .08em
+  text-transform: uppercase
+  white-space: nowrap
+  animation: fadeUp 2.2s ease-out both
+
+.gameOver
+  position: absolute
+  z-index: 3
+  inset: 0
+  display: grid
+  place-items: center
+  padding: 24px
+  background: rgba(3, 5, 4, .76)
+  text-align: center
+
+.gameOverContent
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 12px
+
+.gameOverContent > strong
+  color: rgba(255, 255, 239, .96)
+  font-family: $chalk-font
+  font-size: clamp(29px, 5vw, 46px)
+  font-weight: 400
+
+.gameOverStats
+  display: flex
+  align-items: flex-start
+  justify-content: center
+  gap: clamp(20px, 5vw, 56px)
+  margin: 6px 0
+
+.gameOverStat
+  min-width: 84px
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 7px
+
+.gameOverStat > span
+  color: rgba(236, 237, 218, .66)
+  font-size: 9px
+  letter-spacing: .08em
+  text-transform: uppercase
+
+.gameOverStat strong
+  color: rgba(255, 255, 239, .96)
+  font-size: 25px
+  font-weight: 400
+  font-variant-numeric: tabular-nums
+
+.resourcePips
+  min-height: 27px
+  display: flex
+  align-items: center
+  gap: 7px
+
+.resourcePips i
+  width: 10px
+  height: 10px
+  border: 1px solid rgba(205, 212, 192, .38)
+  border-radius: 50%
+
+.resourcePips .hintPipActive
+  border-color: #e6c979
+  box-shadow: 0 0 7px rgba(230, 201, 121, .36)
+
+.resourcePips .missPipActive
+  border-color: #d98d7f
+  box-shadow: 0 0 7px rgba(217, 141, 127, .34)
+
+.gameOverEyebrow
+  color: rgba(207, 180, 255, .86)
+  font-size: 9px
+  letter-spacing: .2em
+  text-transform: uppercase
+
+.gameOverRestart
+  margin-top: 7px
+  padding: 10px 22px
+  border: 1px solid rgba(239, 236, 211, .55)
+  background: rgba(107, 60, 160, .68)
+  color: #fffaf3
+  font-family: "Chalkduster Local", $chalk-font
+  cursor: pointer
+  transition: background .18s ease, transform .18s ease
+
+.gameOverRestart:hover
+  background: rgba(132, 78, 192, .9)
+  transform: translateY(-1px)
+
+.gameOverRestart:focus-visible
+  outline: 2px solid #f0d9ff
+  outline-offset: 3px
+
+.confetti
+  position: absolute
+  inset: 0
+  pointer-events: none
+
+.confetti i
+  --angle: calc(var(--piece) * 20deg)
+  position: absolute
+  left: 50%
+  top: 50%
+  width: 5px
+  height: 8px
+  background: hsl(calc(45 + var(--piece) * 7), 32%, 75%)
+  animation: burst 1.25s ease-out both
+  animation-delay: calc(var(--piece) * 12ms)
+
+.headerResources
+  display: flex
+  align-items: center
+  gap: clamp(18px, 3vw, 36px)
+
+.headerResource
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 2px
+
+.headerResource > span
+  color: rgba(236, 237, 218, .66)
+  font-size: 9px
+  letter-spacing: .08em
+  text-transform: uppercase
+
+.actionsFooter
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 9px
+  margin-top: clamp(14px, 2.6vh, 24px)
+  padding-bottom: max(5px, env(safe-area-inset-bottom))
+
+.checkpoints
+  display: grid
+  grid-template-columns: repeat(4, minmax(68px, auto))
+  align-items: start
+  justify-content: center
+  column-gap: clamp(18px, 4vw, 48px)
+  row-gap: 10px
+  margin: 3px 0 1px
+
+.checkpoint
+  display: grid
+  justify-items: center
+  gap: 2px
+
+.checkpoint strong
+  color: rgba(255, 255, 239, .94)
+  font-family: "Chalkduster Local", $chalk-font
+  font-size: clamp(25px, 3vw, 34px)
+  font-weight: 400
+  line-height: 1
+
+.checkpoint span
+  color: rgba(236, 237, 218, .65)
+  font-size: 9px
+  letter-spacing: .08em
+  text-transform: uppercase
+
+.resetLockButton
+  margin-top: 1px
+  padding: 1px 6px
+  border: 0
+  background: transparent
+  color: rgba(207, 180, 255, .78)
+  font-size: 9px
+  text-decoration: underline
+  text-underline-offset: 2px
+  cursor: pointer
+
+.resetLockButton:disabled
+  opacity: .42
+  cursor: default
+
+.hintButton
+  position: relative
+  isolation: isolate
+  min-width: 240px
+  min-height: 49px
+  padding: 5px 26px
+  border: 0
+  border-radius: 2rem
+  background: rgba(99, 22, 187, 0.5)
+  border: 0.2rem solid rgb(69, 13, 134)
+
+  margin-bottom: 1rem
+  color: #fffaf3
+  font-family: "Chalkduster Local", $chalk-font
+  font-size: 20px
+  cursor: pointer
+  transition: background .18s ease, transform .18s ease, opacity .18s ease, border .18s ease,
+
+.hintText
+  position: relative
+  z-index: 1
+
+.hintButton:hover:not(:disabled)
+  background: #44007b99
+  border: 0.2rem solid rgb(99, 22, 187)
+
+.hintButton:focus-visible, .restartButton:focus-visible
+  outline: 2px solid #f0d9ff
+  outline-offset: 3px
+
+.resetLockButton:focus-visible
+  outline: 2px solid #f0d9ff
+  outline-offset: 2px
+
+.hintButton:disabled
+  opacity: .58
+  cursor: default
+
+.restartButton
+  padding: 2px 8px
+  border: 0
+  background: transparent
+  color: rgba(255, 244, 255, .76)
+  font-size: 11px
+  text-decoration: underline
+  text-decoration-color: rgba(255, 244, 255, .4)
+  text-underline-offset: 3px
+  cursor: pointer
+
+.restartButton:hover
+  color: #fff
+
+.mobileEntry
+  position: absolute
+  width: 1px
+  height: 1px
+  overflow: hidden
+  clip-path: inset(50%)
+  white-space: nowrap
+
+.mobileEntry input
+  width: 1px
+  height: 1px
+  opacity: 0
+
+@keyframes blinkOff
+  0%, 49%
+    opacity: 1
+  50%, 100%
+    opacity: 0
+
+@keyframes hintReveal
+  0%
+    opacity: 0
+  30%, 70%
+    opacity: 1
+  100%
+    opacity: 0
+
+@keyframes sequenceFlash
+  0%, 100%
+    color: rgba(255, 255, 239, .96)
+    text-shadow: 0 0 1px rgba(255, 255, 235, .6)
+  50%
+    color: #bd8aff
+    text-shadow: 0 0 12px rgba(174, 112, 255, .95)
+
+@keyframes chalkIn
+  from
+    opacity: .35
+    transform: scale(.92) rotate(-3deg)
+  to
+    opacity: 1
+    transform: scale(1) rotate(0)
+
+@keyframes fadeUp
+  0%
+    opacity: 0
+    margin-top: 9px
+  12%, 78%
+    opacity: 1
+    margin-top: 0
+  100%
+    opacity: 0
+    margin-top: -4px
+
+@keyframes burst
+  to
+    transform: translateY(-52px) rotate(200deg)
+    opacity: 0
+
+@media (max-width: 700px)
+  .topBar
+    min-height: 0
+    flex-wrap: wrap
+    justify-content: center
+    gap: 12px
+    padding: 13px 16px 12px
+
+  .brand
+    width: 100%
+    text-align: center
+
+  .brand h1
+    font-size: 29px
+
+  .eyebrow
+    font-size: 8px
+
+  .headerResources
+    width: 100%
+    justify-content: center
+
+  .board
+    justify-content: center
+    padding: 22px 16px
+
+  .digits
+    width: min(100%, 17.2em)
+    grid-template-columns: repeat(10, minmax(0, 1fr))
+    row-gap: 8px
+    font-size: clamp(21px, 6vw, 28px)
+
+  .actionsFooter
+    gap: 7px
+    margin-top: 15px
+    padding-bottom: max(6px, env(safe-area-inset-bottom))
+
+  .checkpoints
+    grid-template-columns: repeat(2, minmax(84px, auto))
+    column-gap: clamp(30px, 12vw, 70px)
+    row-gap: 12px
+
+  .gameOverStats
+    gap: clamp(10px, 4vw, 24px)
+
+  .gameOverStat
+    min-width: 72px
+
+  .gameOverStat > span
+    font-size: 8px
+
+  .gameOverStat strong
+    font-size: 21px
+
+  .hintButton
+    width: min(100%, 340px)
+
+  .mobileEntry
+    position: relative
+    width: auto
+    height: auto
+    overflow: visible
+    clip-path: none
+    flex: 1 1 100%
+    display: flex
+    align-items: center
+    justify-content: center
+
+  .mobileEntry span
+    position: absolute
+    inset: 0
+    display: flex
+    align-items: center
+    justify-content: center
+    color: rgba(202, 204, 185, .42)
+    font-size: 10px
+    pointer-events: none
+
+  .mobileEntry input
+    width: min(100%, 300px)
+    height: 37px
+    opacity: 1
+    padding: 0 12px
+    border: 1px solid rgba(215, 220, 196, .2)
+    border-radius: 2px
+    background: rgba(255, 255, 255, .025)
+    color: transparent
+    caret-color: #e8e8d4
+    text-align: center
+    outline: none
+
+  .mobileEntry input:focus
+    border-color: rgba(215, 220, 196, .54)
+
+@media (max-width: 380px)
+  .checkpoints
+    column-gap: 24px
