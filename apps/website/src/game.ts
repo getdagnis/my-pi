@@ -11,13 +11,16 @@ export const LOCKED_SEQUENCE_KEY = "remember-pi-locked-sequence";
 export const PENDING_SEQUENCE_KEY = "remember-pi-pending-sequence";
 export const PLAYABLE_DIGITS = PI_DIGITS;
 export const INITIAL_VISIBLE_DIGITS = 100;
+export const INITIAL_VISIBLE_DIGITS_MOBILE = 60;
 export const SEQUENCE_LENGTH = 20;
 
 export function visibleDigitCount(score: number, digitsPerRow: number): number {
   const rowSize = Math.max(1, Math.floor(digitsPerRow));
+  const initialVisibleDigits =
+    rowSize === 10 ? INITIAL_VISIBLE_DIGITS_MOBILE : INITIAL_VISIBLE_DIGITS;
   const activeRow = Math.floor(Math.max(0, score) / rowSize);
   const nextRowEnd = (activeRow + 2) * rowSize;
-  return Math.min(PLAYABLE_DIGITS.length, Math.max(INITIAL_VISIBLE_DIGITS, nextRowEnd));
+  return Math.min(PLAYABLE_DIGITS.length, Math.max(initialVisibleDigits, nextRowEnd));
 }
 
 export type GameState = {
