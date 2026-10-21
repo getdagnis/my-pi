@@ -109,7 +109,6 @@ function Game() {
       : DIGITS_PER_ROW_DESKTOP,
   );
   const inputRef = useRef<HTMLInputElement>(null);
-  const activeDigitRef = useRef<HTMLSpanElement>(null);
 
   const enterDigit = useCallback((digit: string) => {
     setGame((current) => submitDigit(current, digit, Date.now()));
@@ -164,16 +163,6 @@ function Game() {
   useEffect(() => {
     savePendingSequence(window.localStorage, game.pendingCleanSequence);
   }, [game.pendingCleanSequence]);
-
-  useEffect(() => {
-    const activeDigit = activeDigitRef.current;
-    if (!activeDigit) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    activeDigit.scrollIntoView({
-      behavior: reducedMotion ? "auto" : "smooth",
-      block: "center",
-    });
-  }, [game.score]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -311,7 +300,6 @@ function Game() {
                   clockNow < game.mistakeUntil;
                 return (
                   <span
-                    ref={current ? activeDigitRef : undefined}
                     className={[
                       styles.digit,
                       guessed ? styles.guessed : "",
