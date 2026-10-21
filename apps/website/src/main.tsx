@@ -329,6 +329,17 @@ function Game() {
                 );
               })}
           </div>
+          <label className={styles.mobileEntry} aria-hidden="true">
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              aria-label="Type the next digit of pi"
+              value={mobileDigits}
+              onChange={(event) => handleMobileInput(event.currentTarget.value)}
+            />
+          </label>
         </div>
         <p
           className={`${styles.status} ${mistakeFeedback ? styles.statusError : ""}`}
@@ -430,17 +441,6 @@ function Game() {
           <button className={styles.restartButton} type="button" onClick={restart}>
             Restart from {game.lockedSequence} (locked)
           </button>
-          <label className={styles.mobileEntry} aria-hidden="true">
-            <input
-              ref={inputRef}
-              type="text"
-              inputMode="decimal"
-              autoComplete="off"
-              aria-label="Type the next digit of pi"
-              value={mobileDigits}
-              onChange={(event) => handleMobileInput(event.currentTarget.value)}
-            />
-          </label>
         </div>
         {celebrating && (
           <div className={styles.celebration} aria-live="assertive">
