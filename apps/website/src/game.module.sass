@@ -10,7 +10,8 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
   color: $chalk
 
 .topBar
-  position: relative
+  position: sticky
+  top: 0
   z-index: 2
   min-height: 82px
   display: flex
@@ -38,18 +39,18 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
 .board
   position: relative
   isolation: isolate
-  flex: 1
-  min-height: 0
-  overflow: hidden
+  flex: 1 0 auto
+  min-height: calc(100svh - 82px)
   display: flex
   flex-direction: column
   align-items: center
-  justify-content: center
+  justify-content: flex-start
   padding: clamp(24px, 5vh, 56px) clamp(18px, 5vw, 72px) 28px
   background-color: #151a16
   background-image: linear-gradient(0deg, rgba(4, 8, 6, .42), rgba(4, 8, 6, .22)), url("../blackboard-bg.png")
-  background-position: center
-  background-size: cover
+  background-position: center, center top
+  background-size: auto, 100% auto
+  background-repeat: no-repeat, repeat-y
 
 .boardWash
   position: absolute
@@ -87,8 +88,11 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
   font-size: .78em
   opacity: .76
 
+.numberPrefix
+  display: inline-flex
+
 .prefixActive
-  color: #b692ff
+  color: #7901cf
   text-shadow: 0 0 12px rgba(174, 132, 255, .78)
 
 .digits
@@ -122,8 +126,21 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
 
 .liveDigit
   position: relative
-  color: #8e62ff
+  color: #4b00b5
   animation: blinkOff 1s steps(1, end) infinite
+
+.mistakeDigit
+  position: relative
+  color: #cf0142
+  animation: mistakeFlash .12s ease-in-out 2
+
+.missOverlay
+  position: fixed
+  inset: 0
+  z-index: 10
+  background-color: transparent
+  pointer-events: none
+  animation: mistakeOverlay .12s ease-in-out 2
 
 .sequenceFlashing .digit
   animation: sequenceFlash .45s ease-in-out 2
@@ -164,7 +181,8 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
   display: grid
   place-items: center
   padding: 24px
-  background: rgba(3, 5, 4, .76)
+  background: rgba(43, 20, 107, 0.492)
+  backdrop-filter: blur(0.5rem)
   text-align: center
 
 .gameOverContent
@@ -311,6 +329,11 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
   font-weight: 400
   line-height: 1
 
+.timerValue
+  width: 5ch
+  text-align: center
+  font-variant-numeric: tabular-nums
+
 .checkpoint span
   color: rgba(236, 237, 218, .65)
   font-size: 9px
@@ -332,6 +355,27 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
   opacity: .42
   cursor: default
 
+.lockActions
+  display: flex
+  align-items: center
+  gap: 5px
+
+.lockEditor
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 3px
+
+.lockEditor input
+  width: 48px
+  padding: 2px 3px
+  border: 1px solid rgba(215, 220, 196, .3)
+  background: rgba(0, 0, 0, .25)
+  color: $chalk
+  font: inherit
+  font-size: 11px
+  text-align: center
+
 .hintButton
   position: relative
   isolation: isolate
@@ -339,9 +383,9 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
   min-height: 49px
   padding: 5px 26px
   border: 0
-  border-radius: 2rem
+  border-radius: 0
   background: rgba(99, 22, 187, 0.5)
-  border: 0.2rem solid rgb(69, 13, 134)
+  border: 1px solid rgb(69, 13, 134)
 
   margin-bottom: 1rem
   color: #fffaf3
@@ -356,7 +400,7 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
 
 .hintButton:hover:not(:disabled)
   background: #44007b99
-  border: 0.2rem solid rgb(99, 22, 187)
+  border-color: rgb(99, 22, 187)
 
 .hintButton:focus-visible, .restartButton:focus-visible
   outline: 2px solid #f0d9ff
@@ -402,6 +446,18 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
     opacity: 1
   50%, 100%
     opacity: 0
+
+@keyframes mistakeFlash
+  0%, 100%
+    text-shadow: 0 0 0 rgba(207, 1, 66, 0)
+  50%
+    text-shadow: 0 0 9px rgba(207, 1, 66, .95)
+
+@keyframes mistakeOverlay
+  0%, 100%
+    background-color: transparent
+  50%
+    background-color: rgba(207, 1, 66, .24)
 
 @keyframes hintReveal
   0%
@@ -466,7 +522,8 @@ $chalk-font: "Chalkduster Local", "Chalkduster Local", "Chalkduster", "Marker Fe
     justify-content: center
 
   .board
-    justify-content: center
+    min-height: calc(100svh - 110px)
+    justify-content: flex-start
     padding: 22px 16px
 
   .digits

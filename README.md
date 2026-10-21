@@ -1,6 +1,6 @@
 # Remember π
 
-A keyboard-first practice game for recalling the first 100 digits after the decimal point of π. Correct digits are written onto a chalkboard, mistakes leave the sequence in place, and each run includes five three-second hints.
+A keyboard-first practice game for recalling 10,000 digits after the decimal point of π. Correct digits are written onto a chalkboard, mistakes leave the sequence in place, and each run includes three three-second hints.
 
 ## Development
 
@@ -11,7 +11,7 @@ npm install
 vp run dev
 ```
 
-The all-time best is stored in this browser's local storage. The game has no server or account.
+The all-time best, locked start, and latest clean line candidate are stored in this browser's local storage. A 20-digit line locks after a second clean completion, or after it and the following line are both completed cleanly. The digit board starts with 100 digits, then adds rows as you progress so one full row stays ahead of the active digit. It currently includes 10,000 verified decimal digits. The game has no server or account.
 
 ## Checks
 

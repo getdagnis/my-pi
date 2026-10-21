@@ -1,4 +1,12 @@
-import { StrictMode, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  StrictMode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from "react";
 import { createRoot } from "react-dom/client";
 import {
   createGame,
@@ -9,18 +17,23 @@ import {
   PLAYABLE_DIGITS,
   readBest,
   readLockedSequence,
+  readPendingSequence,
   revealHint,
   resetLockedSequence,
   saveBest,
   saveLockedSequence,
+  savePendingSequence,
   setLockedSequence,
   submitDigit,
+  visibleDigitCount,
   type GameState,
 } from "./game";
 import styles from "./game.module.sass";
 import "./style.css";
 
 const CONFETTI = Array.from({ length: 18 }, (_, index) => index);
+const DIGITS_PER_ROW_DESKTOP = 20;
+const DIGITS_PER_ROW_MOBILE = 10;
 
 function getBestScore(): number {
   try {
@@ -36,6 +49,19 @@ function getLockedSequence(): number {
   } catch {
     return 0;
   }
+}
+
+function getPendingSequence(lockedSequence: number): number | null {
+  try {
+    return readPendingSequence(window.localStorage, lockedSequence);
+  } catch {
+    return null;
+  }
+}
+
+function getInitialGame(): GameState {
+  const lockedSequence = getLockedSequence();
+  return createGame(getBestScore(), lockedSequence, getPendingSequence(lockedSequence));
 }
 
 function formatTime(milliseconds: number): string {
@@ -72,14 +98,18 @@ function ResourcePips({
 }
 
 function Game() {
-  const [game, setGame] = useState<GameState>(() =>
-    createGame(getBestScore(), getLockedSequence()),
-  );
+  const [game, setGame] = useState<GameState>(getInitialGame);
   const [editingLock, setEditingLock] = useState(false);
   const [lockedSequenceDraft, setLockedSequenceDraft] = useState("0");
   const [clockNow, setClockNow] = useState(Date.now);
   const [mobileDigits, setMobileDigits] = useState("");
+  const [digitsPerRow, setDigitsPerRow] = useState(() =>
+    window.matchMedia("(max-width: 700px)").matches
+      ? DIGITS_PER_ROW_MOBILE
+      : DIGITS_PER_ROW_DESKTOP,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
+  const activeDigitRef = useRef<HTMLSpanElement>(null);
 
   const enterDigit = useCallback((digit: string) => {
     setGame((current) => submitDigit(current, digit, Date.now()));
@@ -96,6 +126,7 @@ function Game() {
       game.hintUntil,
       game.celebrationUntil,
       game.mistakeUntil,
+      game.mistakeOverlayUntil,
       game.lockUpdateAt,
     ].filter((deadline): deadline is number => deadline !== null && deadline > Date.now());
     if (deadlines.length === 0) return;
@@ -103,7 +134,13 @@ function Game() {
       window.setTimeout(() => setClockNow(Date.now()), deadline - Date.now()),
     );
     return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [game.hintUntil, game.celebrationUntil, game.mistakeUntil, game.lockUpdateAt]);
+  }, [
+    game.hintUntil,
+    game.celebrationUntil,
+    game.mistakeUntil,
+    game.mistakeOverlayUntil,
+    game.lockUpdateAt,
+  ]);
 
   useEffect(() => {
     if (game.lockUpdateAt === null) return;
@@ -125,6 +162,20 @@ function Game() {
   }, [game.lockedSequence]);
 
   useEffect(() => {
+    savePendingSequence(window.localStorage, game.pendingCleanSequence);
+  }, [game.pendingCleanSequence]);
+
+  useEffect(() => {
+    const activeDigit = activeDigitRef.current;
+    if (!activeDigit) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    activeDigit.scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth",
+      block: "center",
+    });
+  }, [game.score]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey || event.isComposing) return;
       const target = event.target;
@@ -143,10 +194,20 @@ function Game() {
   }, [enterDigit]);
 
   const activeHint = hintedDigits(game, clockNow);
+  const visibleCount = visibleDigitCount(game.score, digitsPerRow);
   const mistakeFeedback = game.mistakeUntil !== null && clockNow < game.mistakeUntil;
+  const mistakeOverlay = game.mistakeOverlayUntil !== null && clockNow < game.mistakeOverlayUntil;
   const elapsed = game.startedAt === null ? 0 : (game.completedAt ?? clockNow) - game.startedAt;
   const celebrating = game.celebrationUntil !== null && clockNow < game.celebrationUntil;
   const outOfMisses = game.mistakes >= MAX_MISTAKES;
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 700px)");
+    const updateColumns = () =>
+      setDigitsPerRow(media.matches ? DIGITS_PER_ROW_MOBILE : DIGITS_PER_ROW_DESKTOP);
+    media.addEventListener("change", updateColumns);
+    return () => media.removeEventListener("change", updateColumns);
+  }, []);
 
   function handleMobileInput(value: string) {
     setMobileDigits("");
@@ -157,7 +218,9 @@ function Game() {
 
   function restart() {
     setEditingLock(false);
-    setGame((current) => createGame(current.personalBest, current.lockedSequence));
+    setGame((current) =>
+      createGame(current.personalBest, current.lockedSequence, current.pendingCleanSequence),
+    );
     setClockNow(Date.now());
     setMobileDigits("");
     requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
@@ -172,7 +235,7 @@ function Game() {
     setEditingLock(true);
   }
 
-  function saveLockedSequenceEdit(event: React.FormEvent<HTMLFormElement>) {
+  function saveLockedSequenceEdit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = Number(lockedSequenceDraft);
     if (!Number.isInteger(value) || value < 0 || value >= PLAYABLE_DIGITS.length) return;
@@ -182,6 +245,9 @@ function Game() {
 
   return (
     <main className={styles.page}>
+      {mistakeOverlay && (
+        <div key={game.mistakeOverlayUntil} className={styles.missOverlay} aria-hidden="true" />
+      )}
       <header className={styles.topBar}>
         <div className={styles.brand}>
           <span className={styles.eyebrow}>A little practice in infinity</span>
@@ -218,38 +284,62 @@ function Game() {
           <div className={styles.piPrefix} aria-label="Pi equals three">
             <span>π</span>
             <span className={styles.equals}>=</span>
-            <span className={game.prefixEntered && game.score === 0 ? styles.prefixActive : ""}>
-              3.
+            <span className={styles.numberPrefix}>
+              <span
+                className={game.prefixThreeEntered && game.score === 0 ? styles.prefixActive : ""}
+              >
+                3
+              </span>
+              <span
+                className={game.prefixDecimalEntered && game.score === 0 ? styles.prefixActive : ""}
+              >
+                .
+              </span>
             </span>
           </div>
           <div className={styles.digits} aria-label={`${game.score} digits correct`}>
-            {PLAYABLE_DIGITS.split("").map((digit, index) => {
-              const guessed = index < game.score;
-              const hinted = !guessed && index < game.score + activeHint.length;
-              const current = !guessed && !hinted && index === game.score;
-              return (
-                <span
-                  className={[
-                    styles.digit,
-                    guessed ? styles.guessed : "",
-                    hinted ? styles.hinted : "",
-                    current ? styles.liveDigit : "",
-                    !guessed && !hinted && !current ? styles.blank : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  key={index}
-                  aria-hidden="true"
-                  style={
-                    hinted
-                      ? ({ "--hint-delay": `${(index - game.score) * 0.3}s` } as CSSProperties)
-                      : undefined
-                  }
-                >
-                  {guessed ? digit : hinted ? activeHint[index - game.score] : "_"}
-                </span>
-              );
-            })}
+            {PLAYABLE_DIGITS.slice(0, visibleCount)
+              .split("")
+              .map((digit, index) => {
+                const guessed = index < game.score;
+                const hinted = !guessed && index < game.score + activeHint.length;
+                const current = !guessed && !hinted && index === game.score;
+                const wrong =
+                  current &&
+                  game.mistakeDigit !== null &&
+                  game.mistakeUntil !== null &&
+                  clockNow < game.mistakeUntil;
+                return (
+                  <span
+                    ref={current ? activeDigitRef : undefined}
+                    className={[
+                      styles.digit,
+                      guessed ? styles.guessed : "",
+                      hinted ? styles.hinted : "",
+                      current && !wrong ? styles.liveDigit : "",
+                      wrong ? styles.mistakeDigit : "",
+                      !guessed && !hinted && !current ? styles.blank : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    key={index}
+                    aria-hidden="true"
+                    style={
+                      hinted
+                        ? ({ "--hint-delay": `${(index - game.score) * 0.3}s` } as CSSProperties)
+                        : undefined
+                    }
+                  >
+                    {guessed
+                      ? digit
+                      : hinted
+                        ? activeHint[index - game.score]
+                        : wrong
+                          ? game.mistakeDigit
+                          : "_"}
+                  </span>
+                );
+              })}
           </div>
         </div>
         <p
@@ -289,7 +379,7 @@ function Game() {
               <span>Best</span>
             </div>
             <div className={styles.checkpoint}>
-              <strong>{formatTime(elapsed)}</strong>
+              <strong className={styles.timerValue}>{formatTime(elapsed)}</strong>
               <span>Time</span>
             </div>
             <div className={styles.checkpoint}>
