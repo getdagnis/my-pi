@@ -442,8 +442,7 @@ function Game() {
           <button className={styles.restartButton} type="button" onClick={restart}>
             Restart from {game.lockedSequence} (locked)
           </button>
-          <label className={styles.mobileEntry}>
-            <span>Tap here to type digits</span>
+          <label className={styles.mobileEntry} aria-hidden="true">
             <input
               ref={inputRef}
               type="text"
